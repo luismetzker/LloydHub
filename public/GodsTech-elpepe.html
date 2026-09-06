@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GodsTech - Área Admin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    body {
+      background-color: #0b0e14;
+      color: #00ffcc;
+      min-height: 100vh;
+      padding: 30px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+      background-size: 30px 30px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .admin-container {
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(0, 20, 20, 0.9);
+      padding: 35px 30px;
+      border-radius: 16px;
+      border: 1px solid #00ffcc55;
+      box-shadow: 0 0 30px rgba(0, 255, 204, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: #ffcc00;
+      text-shadow: 0 0 15px #ffcc0088;
+      letter-spacing: 2px;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+      border-bottom: 1px solid #00ffcc33;
+      padding-bottom: 20px;
+    }
+
+    .logout-btn {
+      background: #cc3333;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      transition: 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #ff4444;
+      transform: scale(1.02);
+    }
+
+    /* ===== LOGIN ===== */
+    #loginSection {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      text-align: center;
+    }
+
+    #loginSection label {
+      color: #aaffdd;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    #loginSection input {
+      width: 100%;
+      max-width: 400px;
+      padding: 12px 16px;
+      background: #0f1a1a;
+      border: 1px solid #00ffcc66;
+      border-radius: 8px;
+      color: #ccffee;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 15px;
+    }
+
+    #loginSection input:focus {
+      border-color: #00ffcc;
+      box-shadow: 0 0 15px #00ffcc44;
+    }
+
+    #loginSection .btn-login {
+      background: linear-gradient(135deg, #00ccaa, #008877);
+      border: none;
+      padding: 12px 40px;
+      border-radius: 8px;
+      color: #0b0e14;
+      font-weight: bold;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    #loginSection .btn-login:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00ffcc88;
+    }
+
+    .error-msg {
+      color: #ff6666;
+      margin-top: 10px;
+      min-height: 1.5rem;
+    }
+
+    /* ===== TABELA ===== */
+    #dataSection {
+      display: none;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      background: #0f1a1a;
+      border-radius: 12px;
+      padding: 10px;
+      border: 1px solid #00ffcc44;
+      margin-top: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: #ccffee;
+      font-size: 0.9rem;
+      min-width: 600px;
+    }
+
+    th {
+      background: #1a2a2a;
+      color: #00ffcc;
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 2px solid #00ffcc66;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #00ffcc22;
+      vertical-align: middle;
+    }
+
+    td .copy-btn {
+      background: #1a3a3a;
+      border: 1px solid #00ffcc66;
+      color: #ccffee;
+      padding: 4px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: 0.2s;
+    }
+
+    td .copy-btn:hover {
+      background: #00ffcc44;
+      border-color: #00ffcc;
+    }
+
+    .empty-msg {
+      text-align: center;
+      padding: 40px;
+      color: #88bbaa;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-container" id="adminContainer">
+  <!-- CABEÇALHO -->
+  <div class="admin-header">
+    <h1>🛡️ GodsTech · Área Restrita</h1>
+    <button class="logout-btn" id="logoutBtn" style="display:none;">Sair</button>
+  </div>
+
+  <!-- SEÇÃO DE LOGIN -->
+  <div id="loginSection">
+    <label for="secretPassword">🔑 Digite a chave de acesso</label>
+    <input type="password" id="secretPassword" placeholder="Código secreto..." />
+    <button class="btn-login" id="loginBtn">Acessar</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+
+  <!-- SEÇÃO DE DADOS (só aparece após login) -->
+  <div id="dataSection">
+    <div class="table-wrap" id="tableWrapper">
+      <div class="empty-msg">Carregando dados...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===== DOM =====
+  const loginSection = document.getElementById('loginSection');
+  const dataSection = document.getElementById('dataSection');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const secretInput = document.getElementById('secretPassword');
+  const loginError = document.getElementById('loginError');
+  const tableWrapper = document.getElementById('tableWrapper');
+
+  // ===== Verificar autenticação ao carregar =====
+  async function checkAuth() {
+    try {
+      const res = await fetch('/api/check-auth');
+      const data = await res.json();
+      if (data.authenticated) {
+        showDataSection();
+      } else {
+        showLoginSection();
+      }
+    } catch (err) {
+      console.error(err);
+      showLoginSection();
+    }
+  }
+
+  function showLoginSection() {
+    loginSection.style.display = 'flex';
+    dataSection.style.display = 'none';
+    logoutBtn.style.display = 'none';
+    loginError.textContent = '';
+  }
+
+  function showDataSection() {
+    loginSection.style.display = 'none';
+    dataSection.style.display = 'block';
+    logoutBtn.style.display = 'inline-block';
+    loadData();
+  }
+
+  // ===== Login =====
+  loginBtn.addEventListener('click', async () => {
+    const password = secretInput.value.trim();
+    if (!password) {
+      loginError.textContent = 'Digite a senha.';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        showDataSection();
+        loginError.textContent = '';
+        secretInput.value = '';
+      } else {
+        loginError.textContent = '❌ Senha incorreta. Tente novamente.';
+      }
+    } catch (err) {
+      loginError.textContent = 'Erro de conexão.';
+    }
+  });
+
+  // ===== Logout =====
+  logoutBtn.addEventListener('click', async () => {
+    try {
+      await fetch('/api/admin-logout', { method: 'POST' });
+      showLoginSection();
+    } catch (err) {
+      alert('Erro ao sair.');
+    }
+  });
+
+  // ===== Carregar dados da tabela =====
+  async function loadData() {
+    try {
+      const res = await fetch('/api/data');
+      if (res.status === 401) {
+        // Não autenticado
+        showLoginSection();
+        return;
+      }
+      const data = await res.json();
+
+      if (data.length === 0) {
+        tableWrapper.innerHTML = `<div class="empty-msg">📭 Nenhum dado enviado ainda.</div>`;
+        return;
+      }
+
+      // Montar tabela
+      let html = `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>👤 Usuário</th>
+              <th>🔑 Conteúdo</th>
+              <th>📅 Data</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      data.forEach(row => {
+        const date = new Date(row.created_at).toLocaleString('pt-BR');
+        html += `
+          <tr>
+            <td>${row.id}</td>
+            <td>${escapeHtml(row.username)}</td>
+            <td>${escapeHtml(row.content)}</td>
+            <td>${date}</td>
+            <td>
+              <button class="copy-btn" data-copy="${escapeHtml(row.content)}">Copiar</button>
+              <button class="copy-btn" data-copy="${escapeHtml(row.username)}">Copiar user</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      html += `</tbody></table>`;
+      tableWrapper.innerHTML = html;
+
+      // Adicionar eventos de cópia
+      document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const text = btn.getAttribute('data-copy');
+          navigator.clipboard.writeText(text).then(() => {
+            const original = btn.textContent;
+            btn.textContent = '✅ Copiado!';
+            setTimeout(() => { btn.textContent = original; }, 2000);
+          }).catch(() => {
+            alert('Não foi possível copiar.');
+          });
+        });
+      });
+
+    } catch (err) {
+      console.error(err);
+      tableWrapper.innerHTML = `<div class="empty-msg">❌ Erro ao carregar dados.</div>`;
+    }
+  }
+
+  // ===== Função para escapar HTML (segurança) =====
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ===== Enter no campo de senha =====
+  secretInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loginBtn.click();
+  });
+
+  // ===== Inicializar =====
+  checkAuth();
+</script>
+</body>
+</html>
