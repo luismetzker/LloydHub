@@ -1,15 +1,17 @@
 {
   "name": "roblox-descriptografador",
   "version": "1.0.0",
-  "description": "Página fake de descriptografia para pegadinha",
+  "description": "Sistema fake de descriptografia para pegadinha",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "sqlite3": "^5.1.6",
-    "express-session": "^1.17.3",
-    "better-sqlite3": "^9.2.2"
+    "express-session": "^1.17.3"
   }
 }
