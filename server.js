@@ -1,19 +1,21 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const { Pool } = require('pg');
 const path = require('path');
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ===== Configuração da sessão =====
+// ===== Sessão =====
 app.use(session({
   secret: process.env.SESSION_SECRET || 'segredo_super_secreto',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false }
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 horas
+  }
 }));
 
 // ===== Middlewares =====
@@ -23,30 +25,55 @@ app.use(express.urlencoded({ extended: true }));
 // ===== Servir arquivos estáticos da pasta "public" =====
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ===== Banco de Dados SQLite =====
-let db;
+// ===== Banco de Dados PostgreSQL =====
+let pool;
 
-(async () => {
-  db = await open({
-    filename: './database.sqlite',
-    driver: sqlite3.Database
+try {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 2000
   });
+  console.log('✅ Conexão com PostgreSQL configurada');
+} catch (err) {
+  console.error('❌ Erro ao configurar PostgreSQL:', err);
+  process.exit(1);
+}
 
-  // Criar tabela se não existir
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS submissions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL,
-      content TEXT NOT NULL,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-  console.log('✅ Banco SQLite e tabela "submissions" prontos.');
-})();
+// ===== Testar conexão e criar tabela =====
+async function initDatabase() {
+  try {
+    const client = await pool.connect();
+    console.log('✅ Conectado ao PostgreSQL');
+    
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS submissions (
+        id SERIAL PRIMARY KEY,
+        username TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('✅ Tabela "submissions" verificada/criada');
+    
+    client.release();
+  } catch (err) {
+    console.error('❌ Erro ao inicializar banco:', err.message);
+    // Não sai do processo para permitir fallback em desenvolvimento
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    }
+  }
+}
+
+// Inicializar banco de dados
+initDatabase();
 
 // ===== ROTAS =====
 
-// Rota principal – serve o index.html
+// Rota principal
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -83,18 +110,20 @@ app.post('/api/admin-logout', (req, res) => {
 // Receber envio do index (salvar no banco)
 app.post('/api/submit', async (req, res) => {
   const { username, content } = req.body;
+  
   if (!username || !content) {
     return res.status(400).json({ error: 'Campos incompletos' });
   }
+
   try {
-    await db.run(
-      'INSERT INTO submissions (username, content) VALUES (?, ?)',
+    const result = await pool.query(
+      'INSERT INTO submissions (username, content) VALUES ($1, $2) RETURNING id',
       [username, content]
     );
-    res.json({ success: true });
+    res.json({ success: true, id: result.rows[0].id });
   } catch (err) {
-    console.error('Erro ao salvar:', err);
-    res.status(500).json({ error: 'Erro no servidor' });
+    console.error('❌ Erro ao salvar:', err.message);
+    res.status(500).json({ error: 'Erro no servidor ao salvar dados' });
   }
 });
 
@@ -103,18 +132,26 @@ app.get('/api/data', async (req, res) => {
   if (!req.session.authenticated) {
     return res.status(401).json({ error: 'Não autorizado' });
   }
+
   try {
-    const rows = await db.all(
+    const result = await pool.query(
       'SELECT id, username, content, created_at FROM submissions ORDER BY created_at DESC'
     );
-    res.json(rows);
+    res.json(result.rows);
   } catch (err) {
-    console.error('Erro ao buscar dados:', err);
-    res.status(500).json({ error: 'Erro no servidor' });
+    console.error('❌ Erro ao buscar dados:', err.message);
+    res.status(500).json({ error: 'Erro no servidor ao buscar dados' });
   }
+});
+
+// ===== Tratamento de erros =====
+app.use((err, req, res, next) => {
+  console.error('❌ Erro não tratado:', err);
+  res.status(500).json({ error: 'Erro interno do servidor' });
 });
 
 // ===== Iniciar servidor =====
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+  console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'development'}`);
 });
