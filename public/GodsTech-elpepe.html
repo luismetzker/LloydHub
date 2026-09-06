@@ -39,7 +39,7 @@
     }
 
     .admin-container {
-      max-width: 1200px;
+      max-width: 1400px;
       width: 100%;
       background: rgba(0, 20, 20, 0.9);
       padding: 35px 30px;
@@ -145,6 +145,62 @@
       display: none;
     }
 
+    .stats-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #0f1a1a;
+      border-radius: 8px;
+      border: 1px solid #00ffcc33;
+    }
+
+    .stats-bar .stats {
+      color: #88bbaa;
+      font-size: 0.9rem;
+    }
+
+    .stats-bar .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-copy-all {
+      background: #1a3a3a;
+      border: 1px solid #00ffcc66;
+      color: #ccffee;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .btn-copy-all:hover {
+      background: #00ffcc44;
+      border-color: #00ffcc;
+    }
+
+    .btn-refresh {
+      background: #1a3a3a;
+      border: 1px solid #00ffcc66;
+      color: #ccffee;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: 0.2s;
+    }
+
+    .btn-refresh:hover {
+      background: #00ffcc44;
+      border-color: #00ffcc;
+    }
+
     .table-wrap {
       overflow-x: auto;
       background: #0f1a1a;
@@ -152,6 +208,8 @@
       padding: 10px;
       border: 1px solid #00ffcc44;
       margin-top: 10px;
+      max-height: 70vh;
+      overflow-y: auto;
     }
 
     table {
@@ -159,7 +217,7 @@
       border-collapse: collapse;
       color: #ccffee;
       font-size: 0.9rem;
-      min-width: 600px;
+      min-width: 800px;
     }
 
     th {
@@ -168,12 +226,54 @@
       padding: 12px 10px;
       text-align: left;
       border-bottom: 2px solid #00ffcc66;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     td {
       padding: 10px;
       border-bottom: 1px solid #00ffcc22;
-      vertical-align: middle;
+      vertical-align: top;
+      max-width: 400px;
+      word-wrap: break-word;
+      word-break: break-all;
+    }
+
+    td .content-cell {
+      max-width: 500px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-break: break-all;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      background: #0a1212;
+      padding: 8px;
+      border-radius: 4px;
+      border-left: 2px solid #00ffcc44;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    td .content-cell.expanded {
+      max-height: none;
+    }
+
+    td .btn-toggle {
+      background: transparent;
+      border: 1px solid #00ffcc44;
+      color: #88bbaa;
+      padding: 2px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      margin-top: 4px;
+      transition: 0.2s;
+    }
+
+    td .btn-toggle:hover {
+      background: #00ffcc22;
+      border-color: #00ffcc;
     }
 
     td .copy-btn {
@@ -186,10 +286,16 @@
       font-size: 0.8rem;
       transition: 0.2s;
       margin: 2px;
+      white-space: nowrap;
     }
 
     td .copy-btn:hover {
       background: #00ffcc44;
+      border-color: #00ffcc;
+    }
+
+    td .copy-btn.copied {
+      background: #00aa77;
       border-color: #00ffcc;
     }
 
@@ -210,10 +316,123 @@
       border: 1px solid #00ffcc44;
     }
 
-    .stats {
-      color: #88bbaa;
-      font-size: 0.9rem;
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #0b0e14;
+      border: 1px solid #00ffcc66;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 15px;
+      border-bottom: 1px solid #00ffcc33;
+      padding-bottom: 10px;
+    }
+
+    .modal-header h3 {
+      color: #00ffcc;
+    }
+
+    .modal-close {
+      background: #cc3333;
+      border: none;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .modal-close:hover {
+      background: #ff4444;
+    }
+
+    .modal-body {
+      overflow-y: auto;
+      flex: 1;
+      background: #0a1212;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #00ffcc22;
+    }
+
+    .modal-body pre {
+      color: #ccffee;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      word-break: break-all;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .modal-footer {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-footer .btn-copy-modal {
+      background: #00ccaa;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 6px;
+      color: #0b0e14;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .modal-footer .btn-copy-modal:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #00ffcc88;
+    }
+
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: 20px 15px;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      td .content-cell {
+        max-width: 200px;
+        font-size: 0.75rem;
+      }
+      
+      .stats-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
     }
   </style>
 </head>
@@ -233,14 +452,37 @@
   </div>
 
   <div id="dataSection">
-    <div class="stats" id="statsDisplay"></div>
+    <div class="stats-bar">
+      <div class="stats" id="statsDisplay">📊 Carregando...</div>
+      <div class="actions">
+        <button class="btn-copy-all" id="copyAllBtn">📋 Copiar Todos os Dados</button>
+        <button class="btn-refresh" id="refreshBtn">🔄 Atualizar</button>
+      </div>
+    </div>
     <div class="table-wrap" id="tableWrapper">
       <div class="empty-msg">Carregando dados...</div>
     </div>
   </div>
 </div>
 
+<!-- Modal para visualização completa -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">📄 Conteúdo Completo</h3>
+      <button class="modal-close" id="modalClose">✕ Fechar</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <pre id="modalText"></pre>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-copy-modal" id="modalCopyBtn">📋 Copiar Conteúdo</button>
+    </div>
+  </div>
+</div>
+
 <script>
+  // ===== DOM =====
   const loginSection = document.getElementById('loginSection');
   const dataSection = document.getElementById('dataSection');
   const loginBtn = document.getElementById('loginBtn');
@@ -249,6 +491,20 @@
   const loginError = document.getElementById('loginError');
   const tableWrapper = document.getElementById('tableWrapper');
   const statsDisplay = document.getElementById('statsDisplay');
+  const refreshBtn = document.getElementById('refreshBtn');
+  const copyAllBtn = document.getElementById('copyAllBtn');
+  
+  // Modal
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalClose = document.getElementById('modalClose');
+  const modalBody = document.getElementById('modalBody');
+  const modalText = document.getElementById('modalText');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalCopyBtn = document.getElementById('modalCopyBtn');
+
+  let currentData = [];
+
+  // ===== FUNÇÕES =====
 
   async function checkAuth() {
     try {
@@ -278,6 +534,43 @@
     logoutBtn.style.display = 'inline-block';
     loadData();
   }
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function formatDate(dateStr) {
+    try {
+      return new Date(dateStr).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function showModal(title, content) {
+    modalTitle.textContent = title;
+    modalText.textContent = content;
+    modalOverlay.classList.add('active');
+    
+    // Guardar o conteúdo para copiar
+    modalCopyBtn.dataset.content = content;
+  }
+
+  function hideModal() {
+    modalOverlay.classList.remove('active');
+  }
+
+  // ===== LOGIN =====
 
   loginBtn.addEventListener('click', async () => {
     const password = secretInput.value.trim();
@@ -315,11 +608,29 @@
     }
   });
 
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
+  secretInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') loginBtn.click();
+  });
+
+  // ===== MODAL =====
+
+  modalClose.addEventListener('click', hideModal);
+  modalOverlay.addEventListener('click', (e) => {
+    if (e.target === modalOverlay) hideModal();
+  });
+
+  modalCopyBtn.addEventListener('click', () => {
+    const content = modalCopyBtn.dataset.content || '';
+    navigator.clipboard.writeText(content).then(() => {
+      const original = modalCopyBtn.textContent;
+      modalCopyBtn.textContent = '✅ Copiado!';
+      setTimeout(() => { modalCopyBtn.textContent = original; }, 2000);
+    }).catch(() => {
+      alert('Não foi possível copiar.');
+    });
+  });
+
+  // ===== CARREGAR DADOS =====
 
   async function loadData() {
     try {
@@ -328,12 +639,12 @@
         showLoginSection();
         return;
       }
-      const data = await res.json();
+      currentData = await res.json();
 
       // Atualizar estatísticas
-      statsDisplay.textContent = `📊 Total de registros: ${data.length}`;
+      statsDisplay.textContent = `📊 Total de registros: ${currentData.length}`;
 
-      if (data.length === 0) {
+      if (currentData.length === 0) {
         tableWrapper.innerHTML = `<div class="empty-msg">📭 Nenhum dado enviado ainda.</div>`;
         return;
       }
@@ -342,27 +653,36 @@
         <table>
           <thead>
             <tr>
-              <th>#</th>
-              <th>👤 Usuário</th>
+              <th style="width:50px;">#</th>
+              <th style="width:150px;">👤 Usuário</th>
               <th>🔑 Conteúdo</th>
-              <th>📅 Data</th>
-              <th>Ações</th>
+              <th style="width:180px;">📅 Data</th>
+              <th style="width:200px;">Ações</th>
             </tr>
           </thead>
           <tbody>
       `;
 
-      data.forEach(row => {
-        const date = new Date(row.created_at).toLocaleString('pt-BR');
+      currentData.forEach((row, index) => {
+        const date = formatDate(row.created_at);
+        const contentPreview = row.content.length > 100 ? row.content.substring(0, 100) + '...' : row.content;
+        const isLong = row.content.length > 100;
+        
         html += `
           <tr>
-            <td><span class="badge">${row.id}</span></td>
+            <td><span class="badge">${index + 1}</span></td>
             <td><strong>${escapeHtml(row.username)}</strong></td>
-            <td>${escapeHtml(row.content.substring(0, 50))}${row.content.length > 50 ? '...' : ''}</td>
-            <td>${date}</td>
+            <td>
+              <div class="content-cell" id="content-${row.id}">
+                ${escapeHtml(contentPreview)}
+              </div>
+              ${isLong ? `<button class="btn-toggle" onclick="toggleContent(${row.id})">📖 Ver mais</button>` : ''}
+            </td>
+            <td style="font-size:0.8rem;color:#88bbaa;">${date}</td>
             <td>
               <button class="copy-btn" data-copy="${escapeHtml(row.username)}">📋 User</button>
               <button class="copy-btn" data-copy="${escapeHtml(row.content)}">📋 Conteúdo</button>
+              <button class="copy-btn" onclick="viewFullContent(${row.id})">👁️ Ver tudo</button>
             </td>
           </tr>
         `;
@@ -371,13 +691,18 @@
       html += `</tbody></table>`;
       tableWrapper.innerHTML = html;
 
-      document.querySelectorAll('.copy-btn').forEach(btn => {
+      // Adicionar eventos de cópia
+      document.querySelectorAll('.copy-btn[data-copy]').forEach(btn => {
         btn.addEventListener('click', () => {
           const text = btn.getAttribute('data-copy');
           navigator.clipboard.writeText(text).then(() => {
             const original = btn.textContent;
             btn.textContent = '✅ Copiado!';
-            setTimeout(() => { btn.textContent = original; }, 2000);
+            btn.classList.add('copied');
+            setTimeout(() => { 
+              btn.textContent = original;
+              btn.classList.remove('copied');
+            }, 2000);
           }).catch(() => {
             alert('Não foi possível copiar.');
           });
@@ -390,11 +715,78 @@
     }
   }
 
-  secretInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') loginBtn.click();
+  // ===== FUNÇÕES GLOBAIS (usadas no onclick) =====
+
+  window.toggleContent = function(id) {
+    const cell = document.getElementById(`content-${id}`);
+    if (!cell) return;
+    
+    const row = currentData.find(r => r.id === id);
+    if (!row) return;
+    
+    if (cell.classList.contains('expanded')) {
+      cell.textContent = row.content.length > 100 ? row.content.substring(0, 100) + '...' : row.content;
+      cell.classList.remove('expanded');
+      cell.parentElement.querySelector('.btn-toggle').textContent = '📖 Ver mais';
+    } else {
+      cell.textContent = row.content;
+      cell.classList.add('expanded');
+      cell.parentElement.querySelector('.btn-toggle').textContent = '📖 Ver menos';
+    }
+  };
+
+  window.viewFullContent = function(id) {
+    const row = currentData.find(r => r.id === id);
+    if (!row) return;
+    
+    showModal(
+      `📄 Conteúdo Completo - Usuário: ${row.username}`,
+      row.content
+    );
+  };
+
+  // ===== BOTÃO COPIAR TUDO =====
+
+  copyAllBtn.addEventListener('click', async () => {
+    if (currentData.length === 0) {
+      alert('Não há dados para copiar.');
+      return;
+    }
+
+    // Formatar todos os dados
+    let text = '=== DADOS DO DESCRIPTOGRAFADOR ===\n\n';
+    text += `Total de registros: ${currentData.length}\n`;
+    text += '='.repeat(50) + '\n\n';
+    
+    currentData.forEach((row, index) => {
+      text += `[${index + 1}] USUÁRIO: ${row.username}\n`;
+      text += `    CONTEÚDO: ${row.content}\n`;
+      text += `    DATA: ${formatDate(row.created_at)}\n`;
+      text += '-'.repeat(40) + '\n\n';
+    });
+
+    try {
+      await navigator.clipboard.writeText(text);
+      const original = copyAllBtn.textContent;
+      copyAllBtn.textContent = '✅ Todos copiados!';
+      setTimeout(() => { copyAllBtn.textContent = original; }, 3000);
+    } catch (err) {
+      alert('Erro ao copiar. Tente selecionar manualmente.');
+    }
   });
 
+  // ===== BOTÃO ATUALIZAR =====
+
+  refreshBtn.addEventListener('click', () => {
+    loadData();
+  });
+
+  // ===== INICIALIZAR =====
+
   checkAuth();
+
+  // Auto-refresh a cada 30 segundos (opcional)
+  // setInterval(loadData, 30000);
 </script>
 </body>
 </html>
