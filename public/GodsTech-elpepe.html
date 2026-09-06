@@ -85,7 +85,6 @@
       transform: scale(1.02);
     }
 
-    /* ===== LOGIN ===== */
     #loginSection {
       display: flex;
       flex-direction: column;
@@ -142,7 +141,6 @@
       min-height: 1.5rem;
     }
 
-    /* ===== TABELA ===== */
     #dataSection {
       display: none;
     }
@@ -187,6 +185,7 @@
       cursor: pointer;
       font-size: 0.8rem;
       transition: 0.2s;
+      margin: 2px;
     }
 
     td .copy-btn:hover {
@@ -200,18 +199,32 @@
       color: #88bbaa;
       font-size: 1.1rem;
     }
+
+    .badge {
+      display: inline-block;
+      background: #00ffcc22;
+      color: #00ffcc;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      border: 1px solid #00ffcc44;
+    }
+
+    .stats {
+      color: #88bbaa;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
 
 <div class="admin-container" id="adminContainer">
-  <!-- CABEÇALHO -->
   <div class="admin-header">
     <h1>🛡️ GodsTech · Área Restrita</h1>
     <button class="logout-btn" id="logoutBtn" style="display:none;">Sair</button>
   </div>
 
-  <!-- SEÇÃO DE LOGIN -->
   <div id="loginSection">
     <label for="secretPassword">🔑 Digite a chave de acesso</label>
     <input type="password" id="secretPassword" placeholder="Código secreto..." />
@@ -219,8 +232,8 @@
     <div class="error-msg" id="loginError"></div>
   </div>
 
-  <!-- SEÇÃO DE DADOS (só aparece após login) -->
   <div id="dataSection">
+    <div class="stats" id="statsDisplay"></div>
     <div class="table-wrap" id="tableWrapper">
       <div class="empty-msg">Carregando dados...</div>
     </div>
@@ -228,7 +241,6 @@
 </div>
 
 <script>
-  // ===== DOM =====
   const loginSection = document.getElementById('loginSection');
   const dataSection = document.getElementById('dataSection');
   const loginBtn = document.getElementById('loginBtn');
@@ -236,8 +248,8 @@
   const secretInput = document.getElementById('secretPassword');
   const loginError = document.getElementById('loginError');
   const tableWrapper = document.getElementById('tableWrapper');
+  const statsDisplay = document.getElementById('statsDisplay');
 
-  // ===== Verificar autenticação ao carregar =====
   async function checkAuth() {
     try {
       const res = await fetch('/api/check-auth');
@@ -267,7 +279,6 @@
     loadData();
   }
 
-  // ===== Login =====
   loginBtn.addEventListener('click', async () => {
     const password = secretInput.value.trim();
     if (!password) {
@@ -295,7 +306,6 @@
     }
   });
 
-  // ===== Logout =====
   logoutBtn.addEventListener('click', async () => {
     try {
       await fetch('/api/admin-logout', { method: 'POST' });
@@ -305,23 +315,29 @@
     }
   });
 
-  // ===== Carregar dados da tabela =====
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   async function loadData() {
     try {
       const res = await fetch('/api/data');
       if (res.status === 401) {
-        // Não autenticado
         showLoginSection();
         return;
       }
       const data = await res.json();
+
+      // Atualizar estatísticas
+      statsDisplay.textContent = `📊 Total de registros: ${data.length}`;
 
       if (data.length === 0) {
         tableWrapper.innerHTML = `<div class="empty-msg">📭 Nenhum dado enviado ainda.</div>`;
         return;
       }
 
-      // Montar tabela
       let html = `
         <table>
           <thead>
@@ -340,13 +356,13 @@
         const date = new Date(row.created_at).toLocaleString('pt-BR');
         html += `
           <tr>
-            <td>${row.id}</td>
-            <td>${escapeHtml(row.username)}</td>
-            <td>${escapeHtml(row.content)}</td>
+            <td><span class="badge">${row.id}</span></td>
+            <td><strong>${escapeHtml(row.username)}</strong></td>
+            <td>${escapeHtml(row.content.substring(0, 50))}${row.content.length > 50 ? '...' : ''}</td>
             <td>${date}</td>
             <td>
-              <button class="copy-btn" data-copy="${escapeHtml(row.content)}">Copiar</button>
-              <button class="copy-btn" data-copy="${escapeHtml(row.username)}">Copiar user</button>
+              <button class="copy-btn" data-copy="${escapeHtml(row.username)}">📋 User</button>
+              <button class="copy-btn" data-copy="${escapeHtml(row.content)}">📋 Conteúdo</button>
             </td>
           </tr>
         `;
@@ -355,7 +371,6 @@
       html += `</tbody></table>`;
       tableWrapper.innerHTML = html;
 
-      // Adicionar eventos de cópia
       document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const text = btn.getAttribute('data-copy');
@@ -375,19 +390,10 @@
     }
   }
 
-  // ===== Função para escapar HTML (segurança) =====
-  function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  // ===== Enter no campo de senha =====
   secretInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') loginBtn.click();
   });
 
-  // ===== Inicializar =====
   checkAuth();
 </script>
 </body>
