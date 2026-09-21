@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>O Lloyd - LinksHub</title>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
+
+    :root {
+      --cyan: #aafff8;
+      --cyan-strong: #35f5e0;
+      --dark: #001c25;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+      padding: 125px 20px 35px;
+      color: white;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at 50% 15%, #10d9d944, transparent 32%),
+        linear-gradient(135deg, #001018, #004a55, #002b38, #001018);
+      background-size: 180% 180%;
+      animation: backgroundFlow 28s ease-in-out infinite alternate;
+    }
+
+    #matrix {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      opacity: 0.48;
+      pointer-events: none;
+    }
+
+    .logo-corner {
+      position: fixed;
+      top: 22px;
+      left: 24px;
+      z-index: 3;
+      width: 165px;
+      height: 165px;
+      padding: 8px;
+      border: 2px solid var(--cyan-strong);
+      border-radius: 10px;
+      background: #001c25d9;
+      box-shadow:
+        0 0 14px var(--cyan-strong),
+        0 0 35px #00fff044,
+        inset 0 0 18px #00fff033;
+      backdrop-filter: blur(8px);
+      animation: smoothMovement 9s ease-in-out infinite;
+    }
+
+    .corner-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter:
+        drop-shadow(4px 4px 0 #000)
+        drop-shadow(-4px -4px 0 #000)
+        drop-shadow(0 0 12px var(--cyan-strong))
+        drop-shadow(0 0 28px var(--cyan-strong));
+    }
+
+    .logo-reflection {
+      position: absolute;
+      right: 8%;
+      bottom: -38px;
+      left: 8%;
+      height: 55px;
+      background: linear-gradient(to bottom, #aafff866, transparent);
+      transform: scaleY(-1);
+      opacity: 0.35;
+      filter: blur(5px);
+      mask-image: linear-gradient(to bottom, black, transparent);
+    }
+
+    .title-area {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      z-index: 2;
+      width: min(60%, 650px);
+      transform: translateX(-50%);
+    }
+
+    .title-box {
+      padding: 18px 24px;
+      border: 2px solid var(--cyan-strong);
+      border-radius: 10px;
+      text-align: center;
+      background: #001c25d9;
+      box-shadow:
+        0 0 14px var(--cyan-strong),
+        0 0 35px #00fff044,
+        inset 0 0 18px #00fff033;
+      backdrop-filter: blur(8px);
+    }
+
+    .typing-title {
+      min-height: 30px;
+      color: var(--cyan);
+      font-family: "Press Start 2P", monospace;
+      font-size: clamp(12px, 3vw, 24px);
+      font-weight: 900;
+      line-height: 1.5;
+      letter-spacing: 1px;
+      -webkit-text-stroke: 2px #001014;
+      text-shadow:
+        0 0 2px #000,
+        0 0 7px #000,
+        0 0 12px var(--cyan),
+        0 0 25px var(--cyan-strong);
+    }
+
+    .cursor {
+      color: white;
+      text-shadow: 0 0 8px var(--cyan);
+      animation: blink 0.8s steps(1) infinite;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 540px;
+    }
+
+    .links {
+      display: grid;
+      gap: 18px;
+    }
+
+    .image-button {
+      position: relative;
+      isolation: isolate;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-height: 92px;
+      overflow: hidden;
+      padding: 14px 22px;
+      border: 2px solid var(--cyan);
+      border-radius: 16px;
+      color: var(--dark);
+      background:
+        linear-gradient(135deg, #cafffa, #68f1e6 48%, #19aaa9);
+      box-shadow:
+        0 0 10px #00fff099,
+        0 0 28px #00fff044,
+        inset 0 0 18px #ffffffaa;
+      font-weight: bold;
+      text-decoration: none;
+      transition: 0.3s ease;
+    }
+
+    .image-button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -2;
+      opacity: 0.35;
+      background-image:
+        linear-gradient(#ffffff55 1px, transparent 1px),
+        linear-gradient(90deg, #ffffff55 1px, transparent 1px);
+      background-size: 18px 18px;
+      mask-image: linear-gradient(90deg, transparent, black, transparent);
+    }
+
+    .image-button::after {
+      content: "";
+      position: absolute;
+      top: -80%;
+      left: -35%;
+      width: 25%;
+      height: 260%;
+      z-index: -1;
+      transform: rotate(25deg);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        #ffffffbb,
+        transparent
+      );
+      animation: buttonShine 5s ease-in-out infinite;
+    }
+
+    .button-corner {
+      position: absolute;
+      width: 17px;
+      height: 17px;
+      border-color: #00343b;
+      border-style: solid;
+      pointer-events: none;
+    }
+
+    .top-left {
+      top: 7px;
+      left: 7px;
+      border-width: 2px 0 0 2px;
+    }
+
+    .top-right {
+      top: 7px;
+      right: 7px;
+      border-width: 2px 2px 0 0;
+    }
+
+    .bottom-left {
+      bottom: 7px;
+      left: 7px;
+      border-width: 0 0 2px 2px;
+    }
+
+    .bottom-right {
+      right: 7px;
+      bottom: 7px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .button-icon {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      flex: 0 0 58px;
+      border: 2px solid #002f38;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow:
+        0 0 8px #fff,
+        0 0 14px #00fff0aa,
+        inset 0 0 10px #fff;
+      transition: 0.3s ease;
+    }
+
+    .button-icon::before,
+    .button-icon::after {
+      content: "";
+      position: absolute;
+      border: 1px solid #00343b;
+      border-radius: 50%;
+    }
+
+    .button-icon::before {
+      inset: -6px;
+      border-top-color: transparent;
+      border-bottom-color: transparent;
+      animation: iconRing 5s linear infinite;
+    }
+
+    .button-icon::after {
+      inset: -10px;
+      opacity: 0.5;
+      border-left-color: transparent;
+      border-right-color: transparent;
+      animation: iconRingReverse 7s linear infinite;
+    }
+
+    .button-icon img {
+      width: 31px;
+      height: 31px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 4px white);
+    }
+
+    .button-text {
+      flex: 1;
+      text-align: center;
+      text-shadow: 0 1px 1px #ffffffaa;
+    }
+
+    .button-text small {
+      display: block;
+      margin-top: 6px;
+      opacity: 0.7;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .image-button:hover {
+      transform: translateY(-6px) scale(1.025);
+      color: white;
+      background: linear-gradient(135deg, #16a9ae, #00636c);
+      box-shadow:
+        0 0 15px var(--cyan),
+        0 0 42px var(--cyan-strong),
+        inset 0 0 20px #ffffff66;
+    }
+
+    .image-button:hover .button-icon {
+      transform: rotate(-8deg) scale(1.12);
+      background: #001c25;
+      box-shadow:
+        0 0 10px white,
+        0 0 25px var(--cyan);
+    }
+
+    @keyframes smoothMovement {
+      0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      25% {
+        transform: translate(7px, -6px) rotate(2deg);
+      }
+
+      50% {
+        transform: translate(-6px, 5px) rotate(-2deg);
+      }
+
+      75% {
+        transform: translate(5px, 8px) rotate(1deg);
+      }
+    }
+
+    @keyframes buttonShine {
+      0%, 55% {
+        left: -35%;
+      }
+
+      100% {
+        left: 135%;
+      }
+    }
+
+    @keyframes iconRing {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes iconRingReverse {
+      to {
+        transform: rotate(-360deg);
+      }
+    }
+
+    @keyframes backgroundFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 45%;
+      }
+
+      100% {
+        background-position: 35% 100%;
+      }
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .logo-corner {
+        top: 16px;
+        left: 12px;
+        width: 105px;
+        height: 105px;
+      }
+
+      .title-area {
+        left: 58%;
+        width: 58%;
+      }
+
+      .title-box {
+        padding: 14px 10px;
+      }
+
+      .image-button {
+        min-height: 82px;
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+
+      .button-icon {
+        width: 48px;
+        height: 48px;
+        flex-basis: 48px;
+      }
+
+      .button-icon img {
+        width: 25px;
+        height: 25px;
+      }
+
+      .button-text small {
+        font-size: 8px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="matrix" aria-hidden="true"></canvas>
+
+  <div class="logo-corner">
+    <img
+      class="corner-logo"
+      src="O Lloyd - Logo.jpg"
+      alt="Logo O Lloyd"
+    />
+    <div class="logo-reflection"></div>
+  </div>
+
+  <header class="title-area">
+    <div class="title-box">
+      <div class="typing-title">
+        <span id="typed-title"></span><span class="cursor">|</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="links" aria-label="Links principais">
+      <a
+        class="image-button"
+        href="https://www.youtube.com/@O_Lloyd"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="button-corner top-left"></i>
+        <i class="button-corner top-right"></i>
+        <i class="button-corner bottom-left"></i>
+        <i class="button-corner bottom-right"></i>
+
+        <span class="button-icon">
+          <img src="https://cdn.simpleicons.org/youtube/001c25" alt="YouTube" />
+        </span>
+
+        <span class="button-text">
+          O Lloyd (@O_Lloyd)
+          <small>Youtube Channel</small>
+        </span>
+      </a>
+
+      <a
+        class="image-button"
+        href="https://www.youtube.com/@thegods.studio"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="button-corner top-left"></i>
+        <i class="button-corner top-right"></i>
+        <i class="button-corner bottom-left"></i>
+        <i class="button-corner bottom-right"></i>
+
+        <span class="button-icon">
+          <img src="https://cdn.simpleicons.org/youtube/001c25" alt="YouTube" />
+        </span>
+
+        <span class="button-text">
+          TheGods - Studio (@thegods.studio)
+          <small>Studio Channel</small>
+        </span>
+      </a>
+
+      <a
+        class="image-button"
+        href="https://www.tiktok.com/@LloydHEG_3079"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="button-corner top-left"></i>
+        <i class="button-corner top-right"></i>
+        <i class="button-corner bottom-left"></i>
+        <i class="button-corner bottom-right"></i>
+
+        <span class="button-icon">
+          <img src="https://cdn.simpleicons.org/tiktok/001c25" alt="TikTok" />
+        </span>
+
+        <span class="button-text">
+          O Lloyd (@LloydHEG_3079)
+          <small>TikTok Profile</small>
+        </span>
+      </a>
+
+      <a
+        class="image-button"
+        href="https://www.tiktok.com/@TheGods.Studio"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="button-corner top-left"></i>
+        <i class="button-corner top-right"></i>
+        <i class="button-corner bottom-left"></i>
+        <i class="button-corner bottom-right"></i>
+
+        <span class="button-icon">
+          <img src="https://cdn.simpleicons.org/tiktok/001c25" alt="TikTok" />
+        </span>
+
+        <span class="button-text">
+          TheGods - Studio (@TheGods.Studio)
+          <small>Studio Profile</small>
+        </span>
+      </a>
+
+      <a
+        class="image-button"
+        href="mailto:luismetzker9@gmail.com"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i class="button-corner top-left"></i>
+        <i class="button-corner top-right"></i>
+        <i class="button-corner bottom-left"></i>
+        <i class="button-corner bottom-right"></i>
+
+        <span class="button-icon">
+          <img src="https://cdn.simpleicons.org/gmail/001c25" alt="Gmail" />
+        </span>
+
+        <span class="button-text">
+          luismetzker9@gmail.com
+          <small>Contact</small>
+        </span>
+      </a>
+    </nav>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("matrix");
+    const context = canvas.getContext("2d");
+    const titleElement = document.getElementById("typed-title");
+
+    const characters =
+      "アァカサタナハマヤラワン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+      "абвгдежзийклмнопрстуфхцчшщъыьэюя" +
+      "你好世界龍電天使魔法ЖЩДΩΣΠЖΨЖ";
+
+    const title = "O Lloyd - LinksHub";
+    const wrongCharacters = "!@#$%&*<>?/0123456789あЖΩ";
+    const fontSize = 18;
+    const rainDensity = 2.5;
+    let drops = [];
+
+    function resizeCanvas() {
+      const ratio = window.devicePixelRatio || 1;
+
+      canvas.width = window.innerWidth * ratio;
+      canvas.height = window.innerHeight * ratio;
+      canvas.style.width = `${window.innerWidth}px`;
+      canvas.style.height = `${window.innerHeight}px`;
+
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+      const columns = Math.ceil(window.innerWidth / fontSize);
+
+      drops = Array.from(
+        { length: Math.ceil(columns * rainDensity) },
+        () => ({
+          x: Math.floor(Math.random() * columns) * fontSize,
+          y: Math.random() * -window.innerHeight,
+          speed: 0.65 + Math.random() * 0.65,
+        })
+      );
+    }
+
+    function drawMatrix() {
+      context.fillStyle = "rgba(0, 10, 18, 0.075)";
+      context.fillRect(0, 0, window.innerWidth, window.innerHeight);
+      context.font = `${fontSize}px monospace`;
+
+      drops.forEach((drop) => {
+        const character =
+          characters[Math.floor(Math.random() * characters.length)];
+
+        context.fillStyle =
+          Math.random() > 0.94 ? "#bafff8" : "#55fff1";
+
+        context.fillText(character, drop.x, drop.y);
+
+        if (drop.y > window.innerHeight + fontSize) {
+          drop.y = Math.random() * -500;
+        } else {
+          drop.y += fontSize * drop.speed;
+        }
+      });
+
+      requestAnimationFrame(drawMatrix);
+    }
+
+    const wait = (time) =>
+      new Promise((resolve) => setTimeout(resolve, time));
+
+    const randomWrongCharacter = () =>
+      wrongCharacters[
+        Math.floor(Math.random() * wrongCharacters.length)
+      ];
+
+    async function typeTitle() {
+      while (true) {
+        let text = "";
+
+        for (let index = 0; index < title.length; index++) {
+          const character = title[index];
+
+          if (character !== " " && Math.random() < 0.2) {
+            text += randomWrongCharacter();
+            titleElement.textContent = text;
+
+            await wait(140 + Math.random() * 180);
+
+            text = text.slice(0, -1);
+            titleElement.textContent = text;
+
+            await wait(120 + Math.random() * 180);
+          }
+
+          text += character;
+          titleElement.textContent = text;
+
+          await wait(80 + Math.random() * 140);
+
+          if (
+            text.length > 6 &&
+            index < title.length - 1 &&
+            Math.random() < 0.14
+          ) {
+            const amount = Math.min(
+              1 + Math.floor(Math.random() * 3),
+              text.length
+            );
+
+            const removed = text.slice(-amount);
+            text = text.slice(0, -amount);
+            titleElement.textContent = text;
+
+            await wait(220 + Math.random() * 280);
+
+            for (const characterAgain of removed) {
+              text += characterAgain;
+              titleElement.textContent = text;
+
+              await wait(90 + Math.random() * 140);
+            }
+          }
+        }
+
+        await wait(5000);
+
+        while (text.length > 0) {
+          text = text.slice(0, -1);
+          titleElement.textContent = text;
+
+          await wait(65 + Math.random() * 100);
+        }
+
+        await wait(900 + Math.random() * 1100);
+      }
+    }
+
+    resizeCanvas();
+    drawMatrix();
+    typeTitle();
+
+    window.addEventListener("resize", resizeCanvas);
+  </script>
+</body>
+</html>
